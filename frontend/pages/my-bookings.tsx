@@ -55,7 +55,7 @@ const FILTERS = [
 ];
 
 export default function MyBookings() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filter, setFilter] = useState('all');
@@ -76,9 +76,10 @@ export default function MyBookings() {
   }, [filter]);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user) { router.push('/login'); return; }
     fetchBookings();
-  }, [user, router, fetchBookings]);
+  }, [authLoading, user, router, fetchBookings]);
 
   return (
     <>

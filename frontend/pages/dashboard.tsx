@@ -446,7 +446,7 @@ export default function Dashboard() {
                       </span>
                     </div>
                     <div className="space-y-2 text-sm text-gray-600">
-                      <p>UGX {service.price.toLocaleString()}</p>
+                      <p>UGX {Number(service.price).toLocaleString()}</p>
                       <p>{service.duration} minutes</p>
                     </div>
                   </div>

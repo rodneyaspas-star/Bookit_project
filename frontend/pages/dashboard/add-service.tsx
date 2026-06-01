@@ -35,7 +35,7 @@ export default function AddService() {
     const priceNum = parseFloat(price);
     const durationNum = parseInt(duration);
 
-    if (isNaN(priceNum) || priceNum <= 0) { toast.error('Enter a valid price'); return; }
+    if (isNaN(priceNum) || priceNum < 500) { toast.error('Price must be at least UGX 500'); return; }
     if (isNaN(durationNum) || durationNum <= 0) { toast.error('Enter a valid duration in minutes'); return; }
 
     setSubmitting(true);
@@ -113,7 +113,7 @@ export default function AddService() {
                 <input
                   type="number"
                   required
-                  min={1}
+                  min={500}
                   step={500}
                   value={price}
                   onChange={e => setPrice(e.target.value)}

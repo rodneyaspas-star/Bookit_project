@@ -1,11 +1,21 @@
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = process.env.EMAIL_FROM || 'BookIt <notifications@bookit.app>';
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 const send = async ({ to, subject, html }) => {
   try {
-    await resend.emails.send({ from: FROM, to, subject, html });
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || `BookIt <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      html,
+    });
   } catch (err) {
     console.error('Email send error:', err?.message || err);
   }
@@ -16,7 +26,6 @@ const fmt = (date) => new Date(date).toLocaleString('en-UG', {
 });
 
 // ── Booking requested ─────────────────────────────────────────────────────────
-// Sent to PROVIDER when a customer submits a new booking request.
 const sendBookingRequested = ({ customerName, businessEmail, businessOwnerName, businessName, serviceName, startTime, endTime, totalPrice, bookingId }) => {
   const timeDisplay = endTime ? `${fmt(startTime)} – ${fmt(endTime)}` : fmt(startTime);
   return send({
@@ -34,7 +43,6 @@ const sendBookingRequested = ({ customerName, businessEmail, businessOwnerName, 
 };
 
 // ── Booking accepted ──────────────────────────────────────────────────────────
-// Sent to CUSTOMER when provider accepts their request.
 const sendBookingAccepted = ({ customerEmail, customerName, businessName, serviceName, startTime, endTime, totalPrice, bookingId }) => {
   const timeDisplay = endTime ? `${fmt(startTime)} – ${fmt(endTime)}` : fmt(startTime);
   return send({
@@ -52,7 +60,6 @@ const sendBookingAccepted = ({ customerEmail, customerName, businessName, servic
 };
 
 // ── Booking rejected ──────────────────────────────────────────────────────────
-// Sent to CUSTOMER when provider rejects their request.
 const sendBookingRejected = ({ customerEmail, customerName, businessName, serviceName, rejectionReason, bookingId }) => {
   return send({
     to: customerEmail,
@@ -65,7 +72,6 @@ ${rejectionReason ? `<p><strong>Reason:</strong> ${rejectionReason}</p>` : ''}
 };
 
 // ── Payment held ──────────────────────────────────────────────────────────────
-// Sent to CUSTOMER and PROVIDER when payment is simulated and held in escrow.
 const sendPaymentHeld = ({ customerEmail, customerName, businessEmail, businessOwnerName, businessName, serviceName, totalPrice, bookingId }) => {
   return Promise.all([
     send({
@@ -88,7 +94,6 @@ const sendPaymentHeld = ({ customerEmail, customerName, businessEmail, businessO
 };
 
 // ── Provider marked complete ──────────────────────────────────────────────────
-// Sent to CUSTOMER asking them to confirm or dispute.
 const sendProviderMarkedComplete = ({ customerEmail, customerName, businessName, serviceName, totalPrice, bookingId }) =>
   send({
     to: customerEmail,
@@ -100,7 +105,6 @@ const sendProviderMarkedComplete = ({ customerEmail, customerName, businessName,
   });
 
 // ── Escrow released ───────────────────────────────────────────────────────────
-// Sent to CUSTOMER and PROVIDER when escrow is released to provider.
 const sendEscrowReleased = ({ customerEmail, customerName, businessEmail, businessOwnerName, businessName, serviceName, totalPrice, bookingId }) => {
   return Promise.all([
     send({
@@ -122,7 +126,6 @@ const sendEscrowReleased = ({ customerEmail, customerName, businessEmail, busine
 };
 
 // ── Dispute opened ────────────────────────────────────────────────────────────
-// Sent to CUSTOMER and PROVIDER when a dispute is filed.
 const sendDisputeOpened = ({ customerEmail, customerName, businessEmail, businessOwnerName, serviceName, reason, bookingId }) => {
   return Promise.all([
     send({
@@ -145,7 +148,6 @@ const sendDisputeOpened = ({ customerEmail, customerName, businessEmail, busines
 };
 
 // ── Refund processed ──────────────────────────────────────────────────────────
-// Sent to CUSTOMER and PROVIDER when admin resolves in customer's favour.
 const sendRefundProcessed = ({ customerEmail, customerName, businessEmail, businessOwnerName, serviceName, totalPrice, bookingId, adminNotes }) => {
   return Promise.all([
     send({
@@ -168,7 +170,6 @@ ${adminNotes ? `<p><strong>Admin notes:</strong> ${adminNotes}</p>` : ''}`
 };
 
 // ── Cancellation ──────────────────────────────────────────────────────────────
-// Sent to CUSTOMER when a booking is cancelled (by any party).
 const sendCancellationEmail = ({ customerEmail, customerName, businessName, serviceName, startTime, totalPrice, wasRefunded }) =>
   send({
     to: customerEmail,
@@ -180,7 +181,6 @@ ${wasRefunded ? `<p>A simulated refund of <strong>UGX ${Number(totalPrice).toLoc
   });
 
 // ── Cancellation (provider copy) ──────────────────────────────────────────────
-// Sent to PROVIDER when a booking they hold is cancelled (by any party).
 const sendCancellationToProvider = ({ businessEmail, businessOwnerName, customerName, businessName, serviceName, startTime, totalPrice, wasRefunded }) =>
   send({
     to: businessEmail,

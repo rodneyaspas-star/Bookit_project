@@ -174,7 +174,7 @@ router.post('/', authMiddleware, requireRole('business'), [
         [name, description, address, city, state, zip_code, category, contact_info, image_url, userId]
       );
     } else {
-      // Create new business - auto-approve
+      // Create new business - pending admin approval
       business = await db.one(
         `INSERT INTO businesses (user_id, name, description, address, city, state, zip_code, category, contact_info, image_url, is_approved)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, false)
@@ -183,7 +183,7 @@ router.post('/', authMiddleware, requireRole('business'), [
       );
     }
 
-    res.status(201).json({
+    res.status(existingBusiness ? 200 : 201).json({
       message: existingBusiness ? 'Business updated successfully' : 'Business created successfully',
       business
     });

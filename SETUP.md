@@ -32,14 +32,12 @@ npm install
 
 2. Edit `.env` file with your settings:
    ```env
-   DATABASE_URL=postgresql://postgres:password@localhost:5432/appointment_db
+   DATABASE_URL=postgresql://postgres:password@localhost:5432/bookit_db
    JWT_SECRET=your_super_secret_jwt_key_change_in_production
    JWT_EXPIRES_IN=7d
-   EMAIL_HOST=smtp.gmail.com
-   EMAIL_PORT=587
-   EMAIL_USER=your_email@gmail.com
-   EMAIL_PASS=your_app_specific_password
-   STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+   RESEND_API_KEY=your_resend_api_key_here
+   EMAIL_FROM=BookIt <notifications@yourdomain.com>
+   FRONTEND_URL=http://localhost:3000
    PORT=5000
    NODE_ENV=development
    ```
@@ -90,7 +88,6 @@ npm install
 2. Edit `.env.local` file:
    ```env
    NEXT_PUBLIC_API_URL=http://localhost:5000/api
-   NEXT_PUBLIC_STRIPE_PUBLIC_KEY=pk_test_your_stripe_public_key
    ```
 
 #### Start Frontend Server
@@ -119,36 +116,17 @@ After running the seed script, you can use these test accounts:
 
 ## Email Configuration
 
-### Using Gmail
+This project uses [Resend](https://resend.com) for transactional emails.
 
-1. Enable 2-Factor Authentication on your Google account
-2. Generate an App Password:
-   - Go to Google Account Settings
-   - Security → 2-Step Verification
-   - App Passwords
-   - Select "Mail" and your device
-   - Copy the generated password
-
-3. Use this password in your `.env` file:
+1. Create a free account at https://resend.com
+2. Get your API key from the Resend dashboard
+3. Add it to your `.env` file:
    ```env
-   EMAIL_USER=your_email@gmail.com
-   EMAIL_PASS=your_16_character_app_password
+   RESEND_API_KEY=your_resend_api_key_here
+   EMAIL_FROM=BookIt <notifications@yourdomain.com>
    ```
 
-### Using Other Email Services
-
-Update these settings in `.env`:
-- **Outlook**: `smtp.office365.com` (Port: 587)
-- **Yahoo**: `smtp.mail.yahoo.com` (Port: 587)
-- **Custom SMTP**: Use your provider's settings
-
-## Stripe Setup
-
-1. Create a Stripe account at https://stripe.com
-2. Get your API keys from the Dashboard
-3. Add them to your environment files:
-   - Backend `.env`: `STRIPE_SECRET_KEY`
-   - Frontend `.env.local`: `NEXT_PUBLIC_STRIPE_PUBLIC_KEY`
+> Note: Payments are simulated (no real payment gateway is integrated). The escrow flow is handled internally.
 
 ## Project Structure
 
@@ -296,9 +274,8 @@ npm install
 
 1. ✅ Set up local development environment
 2. ✅ Test all features (booking, cancellation, reviews)
-3. ⚙️ Configure Stripe for payments
-4. ⚙️ Set up email notifications
-5. 🚀 Deploy to production (see DEPLOYMENT.md)
+3. ⚙️ Set up email notifications (Resend)
+4. 🚀 Deploy to production (see DEPLOYMENT.md)
 
 ## Additional Features to Implement
 

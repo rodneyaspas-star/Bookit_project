@@ -135,7 +135,7 @@ router.post('/bulk', authMiddleware, requireRole('business'), [
       if (start >= end) return res.status(400).json({ error: 'start_time must be before end_time' });
     }
 
-    const pgp = require('pg-promise')();
+    const { pgp } = db.$config;
     const cs = new pgp.helpers.ColumnSet(['service_id', 'start_time', 'end_time'], { table: 'time_slots' });
     const rows = slots.map(slot => ({ service_id, start_time: slot.start_time, end_time: slot.end_time }));
     await db.none(pgp.helpers.insert(rows, cs));
